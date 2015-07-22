@@ -11,12 +11,13 @@ rushRefreshMaxTimeIntval = 3600000
 rushRefreshTimeIntval = 100
 
 trainTypes = [
-	{"des": u"高/城/动", "code": "G|C|D"},
-	{"des": u"Z开头", "code": "Z"},
-	{"des": u"T开头", "code": "T"},
-	{"des": u"K开头", "code": "K"},
-	{"des": u"普快", "code": ""},
-	{"des": u"临客", "code": "L"}
+	{"des": u"G/C-高铁/城际", "code": "G|C"},
+	{"des": u"D-动车", "code": "D"},
+	{"des": u"Z-直达", "code": "Z"},
+	{"des": u"T-特快", "code": "T"},
+	{"des": u"K-快速", "code": "K"},
+	{"des": u"L-临客", "code": "L"},
+	{"des": u"普快", "code": ""}
 ]
 
 seatTypes = [

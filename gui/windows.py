@@ -55,6 +55,10 @@ class MainWindow(BaseWidget):
 		super(MainWindow, self).__init__(parent)
 		self.initBase()
 
+	def closeEvent(self, event):
+		event.accept() if self.question(u"是否确定要退出？", button1 = u"取消") == 0 else event.ignore()
+
+
 	def initBase(self):
 		self.setWindowTitle(configGui.windowTitle)
 		self.setWindowIcon(self.getLogoIcon())
@@ -131,7 +135,7 @@ class MainWindow(BaseWidget):
 		self.triggerWidgets["searchButton"] = QPushButton(self.tr(u"点击查询"))
 		searchButtonBox.addWidget(self.triggerWidgets["searchButton"])
 		searchButtonBox.addStretch()
-		self.triggerWidgets["searchButton"].setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+		self.triggerWidgets["searchButton"].setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
 		searchBox.addLayout(conditionBox)
 		searchBox.addLayout(searchButtonBox)
@@ -170,15 +174,6 @@ class MainWindow(BaseWidget):
 
 		return trainDataLayout
 
-	def setTrainData(self, trainData = []):
-		trainDataWidget = self.triggerWidgets["trainData"]
-		for i in range(trainDataWidget.rowCount()):
-			trainDataWidget.removeRow(i)
-
-		trainDataWidget.setRowCount(len)
-		for train in trainData:
-			pass
-
 	def getBottomLayout(self):
 		hbox = QHBoxLayout()
 		hbox.addLayout(self.getSelectionLayout())
@@ -205,17 +200,6 @@ class MainWindow(BaseWidget):
 		vbox.addWidget(self.postWidgets["passengerList"])
 
 		return vbox
-
-	def setPassengerData(self, passengerData = []):
-		for passenger in passengerData:
-			pass
-			"""
-			item = QListWidgetItem()
-			checkbox = QCheckBox(self.tr(u"随永杰"))
-
-			self.postWidgets["passengerList"].addItem(item)
-			self.postWidgets["passengerList"].setItemWidget(item, checkbox)
-			"""
 
 	def getSelectionSeatLayout(self):
 		vbox = QVBoxLayout()
@@ -309,5 +293,22 @@ class MainWindow(BaseWidget):
 
 		return vbox
 
-	def closeEvent(self, event):
-		event.accept() if self.question(u"是否确定要退出？", button1 = u"取消") == 0 else event.ignore()
+	def setTrainData(self, trainData):
+		trainDataWidget = self.triggerWidgets["trainData"]
+		for i in range(trainDataWidget.rowCount()):
+			trainDataWidget.removeRow(i)
+
+		trainDataWidget.setRowCount(len)
+		for train in trainData:
+			pass
+
+	def setPassengerData(self, passengerData):
+		for passenger in passengerData:
+			pass
+			"""
+			item = QListWidgetItem()
+			checkbox = QCheckBox(self.tr(u"随永杰"))
+
+			self.postWidgets["passengerList"].addItem(item)
+			self.postWidgets["passengerList"].setItemWidget(item, checkbox)
+			"""

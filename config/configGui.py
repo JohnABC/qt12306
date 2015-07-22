@@ -7,5 +7,5 @@ mainWindowHeight = 500
 trainTableHeight = 250
 postListWidth = 100
 rushTextWidth = 70
-rushWidgetWidth = 80
+rushWidgetWidth = 75
 logoIconImage = "images/logo.ico"
