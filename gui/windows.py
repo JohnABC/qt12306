@@ -47,6 +47,9 @@ class BaseWidget(QWidget):
 class MainWindow(BaseWidget):
 	conditionWidgets = {}
 	triggerWidgets = {}
+	postWidgets = {}
+	rushWidgets = {}
+	printerWidgets = {}
 
 	def __init__(self, parent = None):
 		super(MainWindow, self).__init__(parent)
@@ -63,6 +66,7 @@ class MainWindow(BaseWidget):
 		mainLayout = QVBoxLayout(self)
 		mainLayout.addLayout(self.getSearchLayout())
 		mainLayout.addLayout(self.getTrainDataLayout())
+		mainLayout.addLayout(self.getBottomLayout())
 		mainLayout.addStretch()
 
 	def getSearchLayout(self):
@@ -73,6 +77,8 @@ class MainWindow(BaseWidget):
 		stationConditionBox = QHBoxLayout()
 		trainTypeConditionBox = QHBoxLayout()
 		seatTypeConditionBox = QHBoxLayout()
+
+		searchButtonBox = QHBoxLayout()
 
 		self.conditionWidgets["startStation"] = self.triggerWidgets["startStation"] = QComboBox()
 		self.conditionWidgets["endStation"] = self.triggerWidgets["endStation"] = QComboBox()
@@ -123,9 +129,12 @@ class MainWindow(BaseWidget):
 		conditionBox.addLayout(seatTypeConditionBox)
 
 		self.triggerWidgets["searchButton"] = QPushButton(self.tr(u"点击查询"))
+		searchButtonBox.addWidget(self.triggerWidgets["searchButton"])
+		searchButtonBox.addStretch()
+		self.triggerWidgets["searchButton"].setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
 
 		searchBox.addLayout(conditionBox)
-		searchBox.addWidget(self.triggerWidgets["searchButton"], 1)
+		searchBox.addLayout(searchButtonBox)
 
 		return searchBox
 
@@ -135,7 +144,7 @@ class MainWindow(BaseWidget):
 
 		startDateWidget = QDateTimeEdit()
 		startDateWidget.setDateTime(QDateTime.currentDateTime())
-		startDateWidget.setDisplayFormat("yyyy-mm-dd")
+		startDateWidget.setDisplayFormat("yyyy-MM-dd")
 		startDateWidget.setCalendarPopup(True)
 		startDateWidget.setDateRange(QDate(*minDate), QDate(*maxDate))
 
@@ -146,7 +155,7 @@ class MainWindow(BaseWidget):
 		labelNames = [u"车次", u"出发地", u"目的地", u"历时", u"商务座", u"特等座", u"一等座", u"高等软座", u"软卧", u"硬卧", u"软座", u"硬座", u"无座", u"操作"]
 		
 		self.triggerWidgets["trainData"] = trainDataWidget = QTableWidget()
-		trainDataWidget.setFixedHeight(configCommon.trainDataTableHeight)
+		trainDataWidget.setFixedHeight(configGui.trainTableHeight)
 		trainDataWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
 		trainDataWidget.horizontalHeader().setStretchLastSection(True)
 		trainDataWidget.setColumnCount(len(labelNames))
@@ -161,12 +170,144 @@ class MainWindow(BaseWidget):
 
 		return trainDataLayout
 
-	def setTrainData(self, trainData):
-		for i in range(self.triggerWidgets["trainData"].rowCount()):
-			triggerWidgets["trainData"].removeRow(i)
+	def setTrainData(self, trainData = []):
+		trainDataWidget = self.triggerWidgets["trainData"]
+		for i in range(trainDataWidget.rowCount()):
+			trainDataWidget.removeRow(i)
 
+		trainDataWidget.setRowCount(len)
 		for train in trainData:
 			pass
+
+	def getBottomLayout(self):
+		hbox = QHBoxLayout()
+		hbox.addLayout(self.getSelectionLayout())
+		hbox.addLayout(self.getRushLayout())
+		hbox.addLayout(self.getPrinterLayout())
+		return hbox
+
+	def getSelectionLayout(self):
+		hbox = QHBoxLayout()
+		hbox.addLayout(self.getSelectionPassengerLayout())
+		hbox.addLayout(self.getSelectionSeatLayout())
+		hbox.addLayout(self.getSelectionTrainLayout())
+		hbox.addStretch()
+
+		return hbox
+
+	def getSelectionPassengerLayout(self):
+		vbox = QVBoxLayout()
+
+		self.postWidgets["passengerList"] = self.triggerWidgets["passengerList"] = QListWidget()
+		self.postWidgets["passengerList"].setFixedWidth(configGui.postListWidth)
+
+		vbox.addWidget(QLabel(self.tr(u"*选择乘客")))
+		vbox.addWidget(self.postWidgets["passengerList"])
+
+		return vbox
+
+	def setPassengerData(self, passengerData = []):
+		for passenger in passengerData:
+			pass
+			"""
+			item = QListWidgetItem()
+			checkbox = QCheckBox(self.tr(u"随永杰"))
+
+			self.postWidgets["passengerList"].addItem(item)
+			self.postWidgets["passengerList"].setItemWidget(item, checkbox)
+			"""
+
+	def getSelectionSeatLayout(self):
+		vbox = QVBoxLayout()
+		
+		self.postWidgets["seatList"] = self.triggerWidgets["seatList"] = listWidget = QListWidget()
+		self.postWidgets["seatList"].setFixedWidth(configGui.postListWidth)
+		for seatType in configCommon.seatTypes:
+			if seatType["des"]:
+				item = QListWidgetItem()
+				checkbox = QCheckBox(seatType["des"])
+				checkbox.seatCode = seatType["code"]
+				checkbox.seatNum = seatType["num"]
+				listWidget.addItem(item)
+				listWidget.setItemWidget(item, checkbox)
+
+		vbox.addWidget(QLabel(self.tr(u"*选择席别")))
+		vbox.addWidget(listWidget)
+		
+		return vbox
+
+	def getSelectionTrainLayout(self):
+		vbox = QVBoxLayout()
+
+		self.postWidgets["trainList"] = self.triggerWidgets["trainList"] = QListWidget()
+		self.postWidgets["trainList"].setFixedWidth(configGui.postListWidth)
+
+		vbox.addWidget(QLabel(self.tr(u"*选择车次")))
+		vbox.addWidget(self.postWidgets["trainList"])
+		
+		return vbox
+
+	def getRushLayout(self):
+		vbox = QVBoxLayout()
+		timeOnBox = QHBoxLayout()
+		timeIntervalBox = QHBoxLayout()
+
+		self.rushWidgets["isTimeOn"] = QCheckBox(self.tr(u"定时启动"))
+		self.rushWidgets["timeOnValue"] = self.getTimeOnWidget()
+		self.rushWidgets["isTimeOn"].setFixedWidth(configGui.rushTextWidth)
+		self.rushWidgets["timeOnValue"].setFixedWidth(configGui.rushWidgetWidth)
+
+		self.rushWidgets["isTimeInterval"] = QCheckBox(self.tr(u"查询间隔"))
+		self.rushWidgets["timeIntvalValue"] = self.getTimeIntervalWidget()
+		self.rushWidgets["isTimeInterval"].setFixedWidth(configGui.rushTextWidth)
+		self.rushWidgets["timeIntvalValue"].setFixedWidth(configGui.rushWidgetWidth)
+
+		timeOnBox.addWidget(self.rushWidgets["isTimeOn"])
+		timeOnBox.addWidget(self.rushWidgets["timeOnValue"])
+
+		timeIntervalBox.addWidget(self.rushWidgets["isTimeInterval"])
+		timeIntervalBox.addWidget(self.rushWidgets["timeIntvalValue"])
+
+		self.triggerWidgets["rushButton"] = QPushButton(self.tr(u"开始抢票"))
+		self.triggerWidgets["rushButton"].setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
+
+		vbox.addWidget(QLabel(self.tr(u"抢票设置")))
+		vbox.addLayout(timeOnBox)
+		vbox.addLayout(timeIntervalBox)
+		vbox.addWidget(self.triggerWidgets["rushButton"])
+
+		return vbox
+
+	def getTimeOnWidget(self):
+		minTime = configCommon.getMinimumTime()
+		maxTime = configCommon.getMaximumTime()
+
+		timeOnWidget = QTimeEdit()
+		timeOnWidget.setTime(QTime.fromString(configCommon.saleStartTime, "hh:mm:ss"))
+		timeOnWidget.setDisplayFormat("hh:mm:ss")
+		timeOnWidget.setTimeRange(QTime(*minTime), QTime(*maxTime))
+		timeOnWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+
+		return timeOnWidget
+
+	def getTimeIntervalWidget(self):
+		timeIntervalWidget = QSpinBox()
+		timeIntervalWidget.setRange(configCommon.rushRefreshMinTimeIntval, configCommon.rushRefreshMaxTimeIntval)
+		timeIntervalWidget.setSingleStep(configCommon.rushRefreshTimeIntval)
+		timeIntervalWidget.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+
+		return timeIntervalWidget
+
+	def getPrinterLayout(self):
+		vbox = QVBoxLayout()
+		
+		self.triggerWidgets["printer"] = QTextEdit()
+		self.triggerWidgets["printer"].setReadOnly(True)
+
+		vbox.addWidget(QLabel(self.tr(u"输出日志")))
+		vbox.addWidget(self.triggerWidgets["printer"])
+
+		return vbox
 
 	def closeEvent(self, event):
 		event.accept() if self.question(u"是否确定要退出？", button1 = u"取消") == 0 else event.ignore()

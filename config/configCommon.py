@@ -3,8 +3,12 @@
 import time
 
 saleMinDelayDay = 0
-saleMaxDelayDay = 60
-trainDataTableHeight = 250
+saleMaxDelayDay = 59
+saleStartTime = "07:00:00"
+saleStopTime = "23:00:00"
+rushRefreshMinTimeIntval = 2000
+rushRefreshMaxTimeIntval = 3600000
+rushRefreshTimeIntval = 100
 
 trainTypes = [
 	{"des": u"高/城/动", "code": "G|C|D"},
@@ -38,3 +42,9 @@ def getMinimumDate():
 
 def getMaximumDate():
 	return time.localtime(getNowTimestamp() + saleMaxDelayDay * 24 * 3600)[:3]
+
+def getMinimumTime():
+	return [int(x) for x in saleStartTime.split(":")]
+
+def getMaximumTime():
+	return [int(x) for x in saleStopTime.split(":")]
