@@ -1,5 +1,6 @@
 #-*- coding: utf-8 -*-
 
+import os
 import time
 
 saleMinDelayDay = 0
@@ -9,6 +10,11 @@ saleStopTime = "23:00:00"
 rushRefreshMinTimeIntval = 2000
 rushRefreshMaxTimeIntval = 3600000
 rushRefreshTimeIntval = 100
+
+RS_SUC = 0
+RS_TIMEOUT = 1
+RS_JSON_ERROR = 2
+RS_OTHER_ERROR = 3
 
 trainTypes = [
 	{"des": u"G/C-高铁/城际", "code": "G|C"},
@@ -49,3 +55,36 @@ def getMinimumTime():
 
 def getMaximumTime():
 	return [int(x) for x in saleStopTime.split(":")]
+
+def decMakeDir(func):
+	def handleFunc(*args, **kwargs):
+		dirname = func(*args, **kwargs)
+		if not os.path.exists(dirname):
+			os.makedirs(dirname)
+		elif not os.path.isdir(dirname):
+			pass
+
+		return dirname
+	return func
+
+def getWorkDir():
+	return os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+@decMakeDir
+def getTmpDir():
+	return os.path.join(getWorkDir(), "tmp")
+
+@decMakeDir
+def getLogDir():
+	return os.path.join(getTmpDir(), "log")
+
+@decMakeDir
+def getDataDir():
+	return os.path.join(getTmpDir(), "data")
+
+@decMakeDir
+def getVCodeDir():
+	return os.path.join(getTmpDir(), "vcode")
+
+def getVCodeImageFile(imageName):
+	return os.path.join(getVCodeDir(), imageName + ".jpg")

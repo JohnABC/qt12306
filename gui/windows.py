@@ -1,5 +1,6 @@
 #-*- coding: utf-8 -*-
 
+import os
 import sys
 import time
 from PyQt4.QtGui import *
@@ -14,11 +15,13 @@ class BaseWidget(QWidget):
 	def __init__(self, parent = None):
 		super(BaseWidget, self).__init__(parent)
 
-	def getLogoPixmap(self):
+	@staticmethod
+	def getLogoPixmap():
 		return QPixmap(configGui.logoIconImage)
 
-	def getLogoIcon(self):
-		return QIcon(self.getLogoPixmap())
+	@staticmethod
+	def getLogoIcon():
+		return QIcon(BaseWidget.getLogoPixmap())
 
 	@staticmethod
 	def getCursorPos():
@@ -45,6 +48,7 @@ class BaseWidget(QWidget):
 				return index
 
 class MainWindow(BaseWidget):
+	data = {}
 	conditionWidgets = {}
 	triggerWidgets = {}
 	postWidgets = {}
@@ -54,6 +58,7 @@ class MainWindow(BaseWidget):
 	def __init__(self, parent = None):
 		super(MainWindow, self).__init__(parent)
 		self.initBase()
+		QThread.sleep(10)
 
 	def closeEvent(self, event):
 		event.accept() if self.question(u"是否确定要退出？", button1 = u"取消") == 0 else event.ignore()
@@ -61,7 +66,7 @@ class MainWindow(BaseWidget):
 
 	def initBase(self):
 		self.setWindowTitle(configGui.windowTitle)
-		self.setWindowIcon(self.getLogoIcon())
+		self.setWindowIcon(BaseWidget.getLogoIcon())
 		self.resize(configGui.mainWindowWidth, configGui.mainWindowHeight)
 
 		self.setWindowFlags(Qt.WindowMinimizeButtonHint)
@@ -134,7 +139,6 @@ class MainWindow(BaseWidget):
 
 		self.triggerWidgets["searchButton"] = QPushButton(self.tr(u"点击查询"))
 		searchButtonBox.addWidget(self.triggerWidgets["searchButton"])
-		searchButtonBox.addStretch()
 		self.triggerWidgets["searchButton"].setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
 
 		searchBox.addLayout(conditionBox)
@@ -156,12 +160,13 @@ class MainWindow(BaseWidget):
 
 	def getTrainDataLayout(self):
 		trainDataLayout = QVBoxLayout()
-		labelNames = [u"车次", u"出发地", u"目的地", u"历时", u"商务座", u"特等座", u"一等座", u"高等软座", u"软卧", u"硬卧", u"软座", u"硬座", u"无座", u"操作"]
+		labelNames = [u"车次", u"出发地" + os.linesep + u"目的地", u"出发时间" + os.linesep + u"到达时间", u"历时", u"商务座", u"特等座", u"一等座", u"高等软座", u"软卧", u"硬卧", u"软座", u"硬座", u"无座", u"操作"]
 		
 		self.triggerWidgets["trainData"] = trainDataWidget = QTableWidget()
 		trainDataWidget.setFixedHeight(configGui.trainTableHeight)
 		trainDataWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
 		trainDataWidget.horizontalHeader().setStretchLastSection(True)
+		trainDataWidget.horizontalHeader().setResizeMode(QHeaderView.Stretch)
 		trainDataWidget.setColumnCount(len(labelNames))
 
 		headerLabels = QStringList()
@@ -186,7 +191,6 @@ class MainWindow(BaseWidget):
 		hbox.addLayout(self.getSelectionPassengerLayout())
 		hbox.addLayout(self.getSelectionSeatLayout())
 		hbox.addLayout(self.getSelectionTrainLayout())
-		hbox.addStretch()
 
 		return hbox
 
@@ -235,6 +239,7 @@ class MainWindow(BaseWidget):
 		vbox = QVBoxLayout()
 		timeOnBox = QHBoxLayout()
 		timeIntervalBox = QHBoxLayout()
+		advanceRadioBox = QHBoxLayout()
 
 		self.rushWidgets["isTimeOn"] = QCheckBox(self.tr(u"定时启动"))
 		self.rushWidgets["timeOnValue"] = self.getTimeOnWidget()
@@ -246,11 +251,18 @@ class MainWindow(BaseWidget):
 		self.rushWidgets["isTimeInterval"].setFixedWidth(configGui.rushTextWidth)
 		self.rushWidgets["timeIntvalValue"].setFixedWidth(configGui.rushWidgetWidth)
 
+		self.rushWidgets["isSeatAdvance"] = QRadioButton(self.tr(u"坐席优先"))
+		self.rushWidgets["isTrainAdvance"] = QRadioButton(self.tr(u"车次优先"))
+		self.rushWidgets["isSeatAdvance"].setChecked(True)
+
 		timeOnBox.addWidget(self.rushWidgets["isTimeOn"])
 		timeOnBox.addWidget(self.rushWidgets["timeOnValue"])
 
 		timeIntervalBox.addWidget(self.rushWidgets["isTimeInterval"])
 		timeIntervalBox.addWidget(self.rushWidgets["timeIntvalValue"])
+
+		advanceRadioBox.addWidget(self.rushWidgets["isSeatAdvance"])
+		advanceRadioBox.addWidget(self.rushWidgets["isTrainAdvance"])
 
 		self.triggerWidgets["rushButton"] = QPushButton(self.tr(u"开始抢票"))
 		self.triggerWidgets["rushButton"].setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Expanding)
@@ -258,6 +270,7 @@ class MainWindow(BaseWidget):
 		vbox.addWidget(QLabel(self.tr(u"抢票设置")))
 		vbox.addLayout(timeOnBox)
 		vbox.addLayout(timeIntervalBox)
+		vbox.addLayout(advanceRadioBox)
 		vbox.addWidget(self.triggerWidgets["rushButton"])
 
 		return vbox
@@ -293,7 +306,12 @@ class MainWindow(BaseWidget):
 
 		return vbox
 
+	def setStationData(self, stationData):
+		pass
+
 	def setTrainData(self, trainData):
+		#需要获取 车型/席别 筛选
+		#根据数组长度设置表格行数
 		trainDataWidget = self.triggerWidgets["trainData"]
 		for i in range(trainDataWidget.rowCount()):
 			trainDataWidget.removeRow(i)
@@ -312,3 +330,65 @@ class MainWindow(BaseWidget):
 			self.postWidgets["passengerList"].addItem(item)
 			self.postWidgets["passengerList"].setItemWidget(item, checkbox)
 			"""
+
+class LoginDialog(QDialog):
+	triggerWidgets = {}
+	postWidgets = {}
+
+	def __init__(self, parent = None):
+		super(LoginDialog, self).__init__(parent)
+		self.initDialog()
+
+	def initDialog(self):
+		mainLayout = QGridLayout()
+
+		self.triggerWidgets["username"] = self.postWidgets["username"] = QComboBox()
+		self.triggerWidgets["username"].setEditable(True)
+		self.triggerWidgets["password"] = self.postWidgets["password"] = QLineEdit()
+		self.triggerWidgets["password"].setEchoMode(QLineEdit.Password);
+		self.triggerWidgets["submitButton"] = QPushButton(self.tr(u"登录"))
+
+		forgetLink = configGui.getLinkLabel(u"忘记密码", "http://www.yilexun.com")
+		registerLink = configGui.getLinkLabel(u"注册", "http://www.baidu.com")
+
+		mainLayout.addWidget(QLabel(self.tr(u"用户名:")), 0, 0)
+		mainLayout.addWidget(self.triggerWidgets["username"], 0, 1)
+		mainLayout.addWidget(QLabel(self.tr(u"密　码:")), 1, 0)
+		mainLayout.addWidget(self.triggerWidgets["password"], 1, 1)
+		mainLayout.addWidget(QPushButton(self.tr(u"登录")), 2, 0, 1, 2)
+		mainLayout.addWidget(forgetLink, 3, 0)
+		mainLayout.addWidget(registerLink, 3, 1)
+
+		self.setLayout(mainLayout)
+
+		self.setWindowTitle(u"12306登录")
+		self.setWindowIcon(BaseWidget.getLogoIcon())
+		self.setFixedSize(self.sizeHint())
+
+class VerifyCodeDialog(QDialog):
+	imageLable = None
+	refreshButton = None
+	submitButton = None
+
+	def __init__(self, parent = None):
+		super(VerifyCodeDialog, self).__init__(parent)
+
+		self.imageLabel = QLabel()
+		self.imageLabel.setFixedSize(configGui.verifyCodeWidth, configGui.verifyCodeHeight)
+
+		buttonBox = QDialogButtonBox()
+		self.refreshButton = buttonBox.addButton(self.tr(u"刷新"), QDialogButtonBox.ResetRole)
+		self.submitButton = buttonBox.addButton(self.tr(u"提交"), QDialogButtonBox.YesRole)
+
+		vbox = QVBoxLayout()
+		vbox.addWidget(self.imageLabel)
+		vbox.addWidget(buttonBox)
+
+		self.setLayout(vbox)
+
+		self.setWindowTitle(self.tr(u"请点击对应图案"))
+		self.setFixedSize(self.minimumSizeHint())
+
+	def setImage(imageFileName):
+		self.imageLabel.setPixmap(QPixmap(configCommon.getVCodeImageFile(imageFileName)))
+
