@@ -15,8 +15,14 @@ rushTextWidth = 70
 rushWidgetWidth = 75
 verifyCodeWidth = 293
 verifyCodeHeight = 190
-logoIconImage = os.path.join(configCommon.getWorkDir(), "gui", "images", "logo.ico")
+splashKeepTime = 2
+splashOpacityChangeNum = 0.02
+splashOpacityChangeTime = 0.04
+registerUrl = "https://kyfw.12306.cn/otn/regist/init"
+forgetUrl = "https://kyfw.12306.cn/otn/forgetPassword/initforgetMyPassword"
 
-def getLinkLabel(label, link, style = "color:blue"):
-	labelWidget = QLabel(QWidget.tr('<a href="%s" style="%s">%s</a>' % (link, style, label)))
-	labelWidget.setOpenExternalLinks(True)
+def imageDir():
+	return os.path.join(configCommon.getWorkDir(), "gui", "images")
+
+def getImage(imageName):
+	return os.path.join(imageDir(), imageName)

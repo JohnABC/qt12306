@@ -5,7 +5,7 @@ import requests
 from lib import logger
 from config import configCommon, configUrl
 
-class Request():
+class Request(object):
 	s = None
 
 	def __init__(self):

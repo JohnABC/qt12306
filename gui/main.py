@@ -1,53 +1,14 @@
 #-*- coding: utf-8 -*-
 
 import os
-import sys
-import time
 from PyQt4.QtGui import *
 from PyQt4.QtCore import *
 
+from base import Base
 from config import configGui
 from config import configCommon
 
-QTextCodec.setCodecForTr(QTextCodec.codecForName(configGui.charset))
-
-class BaseWidget(QWidget):
-	def __init__(self, parent = None):
-		super(BaseWidget, self).__init__(parent)
-
-	@staticmethod
-	def getLogoPixmap():
-		return QPixmap(configGui.logoIconImage)
-
-	@staticmethod
-	def getLogoIcon():
-		return QIcon(BaseWidget.getLogoPixmap())
-
-	@staticmethod
-	def getCursorPos():
-		return QCursor.pos()
-
-	def question(self, text, button0 = u"确定", button1 = u"", button2 = u"", title = u"提示"):
-		box = QMessageBox()
-		box.setWindowTitle(self.tr(title))
-		box.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowTitleHint)
-		box.setIconPixmap(self.getLogoPixmap())
-		box.setText(self.tr(text))
-
-		buttons = []
-		buttons.append(box.addButton(self.tr(button0), QMessageBox.YesRole))
-		if button1:
-			buttons.append(box.addButton(self.tr(button1), QMessageBox.NoRole))
-		if button2:
-			buttons.append(box.addButton(self.tr(button2), QMessageBox.DestructiveRole))
-
-		box.exec_()
-
-		for index, button in enumerate(buttons):
-			if button == box.clickedButton():
-				return index
-
-class MainWindow(BaseWidget):
+class Main(Base):
 	data = {}
 	conditionWidgets = {}
 	triggerWidgets = {}
@@ -56,7 +17,7 @@ class MainWindow(BaseWidget):
 	printerWidgets = {}
 
 	def __init__(self, parent = None):
-		super(MainWindow, self).__init__(parent)
+		super(Main, self).__init__(parent)
 		self.initBase()
 		QThread.sleep(10)
 
@@ -66,7 +27,7 @@ class MainWindow(BaseWidget):
 
 	def initBase(self):
 		self.setWindowTitle(configGui.windowTitle)
-		self.setWindowIcon(BaseWidget.getLogoIcon())
+		self.setWindowIcon(Base.getLogoIcon())
 		self.resize(configGui.mainWindowWidth, configGui.mainWindowHeight)
 
 		self.setWindowFlags(Qt.WindowMinimizeButtonHint)
@@ -165,6 +126,7 @@ class MainWindow(BaseWidget):
 		self.triggerWidgets["trainData"] = trainDataWidget = QTableWidget()
 		trainDataWidget.setFixedHeight(configGui.trainTableHeight)
 		trainDataWidget.setSelectionBehavior(QAbstractItemView.SelectRows)
+		trainDataWidget.setSelectionMode(QAbstractItemView.ExtendedSelection)
 		trainDataWidget.horizontalHeader().setStretchLastSection(True)
 		trainDataWidget.horizontalHeader().setResizeMode(QHeaderView.Stretch)
 		trainDataWidget.setColumnCount(len(labelNames))
@@ -330,65 +292,3 @@ class MainWindow(BaseWidget):
 			self.postWidgets["passengerList"].addItem(item)
 			self.postWidgets["passengerList"].setItemWidget(item, checkbox)
 			"""
-
-class LoginDialog(QDialog):
-	triggerWidgets = {}
-	postWidgets = {}
-
-	def __init__(self, parent = None):
-		super(LoginDialog, self).__init__(parent)
-		self.initDialog()
-
-	def initDialog(self):
-		mainLayout = QGridLayout()
-
-		self.triggerWidgets["username"] = self.postWidgets["username"] = QComboBox()
-		self.triggerWidgets["username"].setEditable(True)
-		self.triggerWidgets["password"] = self.postWidgets["password"] = QLineEdit()
-		self.triggerWidgets["password"].setEchoMode(QLineEdit.Password);
-		self.triggerWidgets["submitButton"] = QPushButton(self.tr(u"登录"))
-
-		forgetLink = configGui.getLinkLabel(u"忘记密码", "http://www.yilexun.com")
-		registerLink = configGui.getLinkLabel(u"注册", "http://www.baidu.com")
-
-		mainLayout.addWidget(QLabel(self.tr(u"用户名:")), 0, 0)
-		mainLayout.addWidget(self.triggerWidgets["username"], 0, 1)
-		mainLayout.addWidget(QLabel(self.tr(u"密　码:")), 1, 0)
-		mainLayout.addWidget(self.triggerWidgets["password"], 1, 1)
-		mainLayout.addWidget(QPushButton(self.tr(u"登录")), 2, 0, 1, 2)
-		mainLayout.addWidget(forgetLink, 3, 0)
-		mainLayout.addWidget(registerLink, 3, 1)
-
-		self.setLayout(mainLayout)
-
-		self.setWindowTitle(u"12306登录")
-		self.setWindowIcon(BaseWidget.getLogoIcon())
-		self.setFixedSize(self.sizeHint())
-
-class VerifyCodeDialog(QDialog):
-	imageLable = None
-	refreshButton = None
-	submitButton = None
-
-	def __init__(self, parent = None):
-		super(VerifyCodeDialog, self).__init__(parent)
-
-		self.imageLabel = QLabel()
-		self.imageLabel.setFixedSize(configGui.verifyCodeWidth, configGui.verifyCodeHeight)
-
-		buttonBox = QDialogButtonBox()
-		self.refreshButton = buttonBox.addButton(self.tr(u"刷新"), QDialogButtonBox.ResetRole)
-		self.submitButton = buttonBox.addButton(self.tr(u"提交"), QDialogButtonBox.YesRole)
-
-		vbox = QVBoxLayout()
-		vbox.addWidget(self.imageLabel)
-		vbox.addWidget(buttonBox)
-
-		self.setLayout(vbox)
-
-		self.setWindowTitle(self.tr(u"请点击对应图案"))
-		self.setFixedSize(self.minimumSizeHint())
-
-	def setImage(imageFileName):
-		self.imageLabel.setPixmap(QPixmap(configCommon.getVCodeImageFile(imageFileName)))
-
