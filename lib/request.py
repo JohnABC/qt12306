@@ -6,14 +6,14 @@ from lib import logger
 from config import configCommon, configUrl
 
 class Request(object):
-	s = None
+	_s = None
 
 	def __init__(self):
 		self.initS()
 
 	def initS(self):
-		self.s = requests.Session()
-		self.s.verify = False #默认不验证对方证书
+		self._s = requests.Session()
+		self._s.verify = False #默认不验证对方证书
 		self.setHeaders(self.getHeaders()) #默认header配置为get_headers方法中的配置
 
 		return self
@@ -46,21 +46,21 @@ class Request(object):
 		}
 
 	def setHeaders(self, headers):
-		self.s.headers.update(headers)
+		self._s.headers.update(headers)
 		return self
 
 	def getHeadersHost(self):
-		return self.s.headers["Host"]
+		return self._s.headers["Host"]
 
 	def setHeadersHost(self, host):
-		self.s.headers.update({"Host": host})
+		self._s.headers.update({"Host": host})
 		return self
 
 	def getHeadersReferer(self):
-		return self.s.headers["Referer"]
+		return self._s.headers["Referer"]
 		
 	def setHeadersReferer(self, referer):
-		self.s.headers.update({"Referer": referer})
+		self._s.headers.update({"Referer": referer})
 		return self
 
 	def request(self, reqType, data = (), gp = 'GET', dataIsConfig = False, getR = False):
@@ -115,9 +115,9 @@ class Request(object):
 		r = None
 		try:
 			if gp in ('GET', 'GETJ'):
-				r = self.s.get(url, timeout = timeout)
+				r = self._s.get(url, timeout = timeout)
 			else:
-				r = self.s.post(url, data = data, timeout = timeout)
+				r = self._s.post(url, data = data, timeout = timeout)
 
 			if getR:
 				rtn["r"] = r
@@ -147,6 +147,8 @@ class Request(object):
 			self.setHeadersHost(oldHost)
 		if oldReferer:
 			self.setHeadersReferer(oldReferer)
+			
+		return rtn["data"]
 		return rtn
 
 	def get(self, type, params = (), getR = False):

@@ -1,3 +1,5 @@
+#-*- coding: utf-8 -*-
+
 urls = {
 	"leftTicketInit": {
 		"req_url": "https://kyfw.12306.cn/otn/leftTicket/init",
@@ -35,7 +37,7 @@ urls = {
 		"req_url": "https://kyfw.12306.cn/otn/login/userLogin", #登录后查看用户状态是否正常
 		"req_log_url": True
 	},
-	"codeGet": {
+	"codeImage": {
 		"req_url": "https://kyfw.12306.cn/otn/passcodeNew/getPassCodeNew?module=%s&rand=%s&%s",
 		"req_log_url": True
 	},

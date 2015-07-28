@@ -20,6 +20,7 @@ splashOpacityChangeNum = 0.02
 splashOpacityChangeTime = 0.04
 registerUrl = "https://kyfw.12306.cn/otn/regist/init"
 forgetUrl = "https://kyfw.12306.cn/otn/forgetPassword/initforgetMyPassword"
+vcodeImageTipHeight = 30
 
 def imageDir():
 	return os.path.join(configCommon.getWorkDir(), "gui", "images")
