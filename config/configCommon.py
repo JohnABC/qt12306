@@ -79,8 +79,8 @@ def getLogDir():
 	return os.path.join(getTmpDir(), "log")
 
 @decMakeDir
-def getDataDir():
-	return os.path.join(getTmpDir(), "data")
+def getCacheDir():
+	return os.path.join(getTmpDir(), "cache")
 
 @decMakeDir
 def getVCodeDir():
@@ -88,3 +88,6 @@ def getVCodeDir():
 
 def getVCodeImageFile(imageName):
 	return os.path.join(getVCodeDir(), imageName + ".jpg")
+	
+def getCacheFile(cacheType):
+	return os.path.join(getCacheDir(), cacheType + ".cache")

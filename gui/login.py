@@ -84,6 +84,7 @@ class Login(Base):
 				if not train12306.isLoginSuccess(loginRes):
 					self.updateMessage(train12306.getLoginFailedReason(loginRes), color = "red")
 				else:
+					self.triggerWidgets["submitButton"].setDisabled(True)
 					self.updateMessage(u"登录成功", color = "green")
 					
 				break
